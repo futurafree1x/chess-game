@@ -35,6 +35,9 @@ namespace chess_game
         5.3. move stack
         5.4. resign button
         */
+        private const int SquareSize = 80;
+        private readonly Color lightSquare = Color.FromArgb(221, 221, 221);
+        private readonly Color darkSquare = Color.FromArgb(48, 71, 94);
         public GameWindow()
         {
             InitializeComponent();
@@ -44,13 +47,32 @@ namespace chess_game
 
         private void GameWindow_Load(object sender, EventArgs e)
         {
-            
-            this.AutoScaleMode = AutoScaleMode.Dpi;
-            this.Size = new Size(1000,800);
+            this.ClientSize = new Size(1000, 800);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.BackColor = Color.FromArgb(48, 46, 43);
         }
+
+        private void panelBoard_Paint(object sender, PaintEventArgs e) // draw the chessboard
+        {
+            using (var light = new SolidBrush(lightSquare))
+            using (var dark = new SolidBrush(darkSquare))
+            {
+                for (int rank = 0; rank < 8; rank++)
+                {
+                    for (int file = 0; file < 8; file++)
+                    {
+                        bool isLight = (rank + file) % 2 == 0;
+                        e.Graphics.FillRectangle(isLight ? light : dark,
+                            file * SquareSize, rank * SquareSize, SquareSize, SquareSize);
+                    }
+                }
+
+
+            }
+
+        }
     }
 }
+
