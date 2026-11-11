@@ -89,6 +89,11 @@ namespace chess_game
                     
                     g.DrawImage(pieceImages[piece], file * SquareSize, (7 - rank) * SquareSize, SquareSize, SquareSize);
                 }
+                if (dragFrom != -1)
+                {
+                    g.DrawImage(pieceImages[board.Squares[dragFrom]],
+                        dragPoint.X - SquareSize / 2, dragPoint.Y - SquareSize / 2, SquareSize, SquareSize);
+                }
             }
         }
 
