@@ -82,19 +82,19 @@ namespace chess_game
             for (int i = 0; i < 64; i++)
             {
                 Piece piece = board.Squares[i];
-                if (piece != Piece.None)
-                {
-                    int rank = i / 8;
-                    int file = i % 8;
-                    
-                    g.DrawImage(pieceImages[piece], file * SquareSize, (7 - rank) * SquareSize, SquareSize, SquareSize);
-                }
-                if (dragFrom != -1)
-                {
-                    g.DrawImage(pieceImages[board.Squares[dragFrom]],
-                        dragPoint.X - SquareSize / 2, dragPoint.Y - SquareSize / 2, SquareSize, SquareSize);
-                }
+                if (piece == Piece.None || i == dragFrom) continue;
+
+                int rank = i / 8;
+                int file = i % 8;
+
+                g.DrawImage(pieceImages[piece], file * SquareSize, (7 - rank) * SquareSize, SquareSize, SquareSize);
             }
+            if (dragFrom != -1)
+            {
+                g.DrawImage(pieceImages[board.Squares[dragFrom]],
+                 dragPoint.X - SquareSize / 2, dragPoint.Y - SquareSize / 2, SquareSize, SquareSize);
+            }
+            
         }
 
         private void panelBoard_MouseDown(object sender, MouseEventArgs e)
