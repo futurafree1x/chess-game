@@ -38,6 +38,9 @@
             this.panelBoard.Size = new System.Drawing.Size(640, 640);
             this.panelBoard.TabIndex = 0;
             this.panelBoard.Paint += new System.Windows.Forms.PaintEventHandler(this.panelBoard_Paint);
+            this.panelBoard.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panelBoard_MouseDown);
+            this.panelBoard.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panelBoard_MouseMove);
+            this.panelBoard.MouseUp += new System.Windows.Forms.MouseEventHandler(this.panelBoard_MouseUp);
             // 
             // GameWindow
             // 

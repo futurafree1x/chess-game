@@ -22,6 +22,17 @@ namespace chess_game
         
         private readonly Color lightSquare = Color.FromArgb(221, 221, 221);
         private readonly Color darkSquare = Color.FromArgb(48, 71, 94);
+        private int dragFrom = -1; // square being dragged from or -1 if none
+        private Point dragPoint; // get mouse position during drag
+        private int SquareAt(Point p) // helper function to get the square index from a mouse click point, returns -1 if outside the board
+        {
+            if (p.X < 0 || p.Y < 0 || p.X >= 8 * SquareSize || p.Y >= 8 * SquareSize)
+                return -1;
+
+            int file = p.X / SquareSize;
+            int rank = 7 - p.Y / SquareSize;
+            return rank * 8 + file;
+        }
         public GameWindow()
         {
             InitializeComponent();
@@ -79,6 +90,22 @@ namespace chess_game
                     g.DrawImage(pieceImages[piece], file * SquareSize, (7 - rank) * SquareSize, SquareSize, SquareSize);
                 }
             }
+        }
+
+        private void panelBoard_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            int square = SquareAt(e.Location);
+        }
+
+        private void panelBoard_MouseMove(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void panelBoard_MouseUp(object sender, MouseEventArgs e)
+        {
+
         }
     }
 }
