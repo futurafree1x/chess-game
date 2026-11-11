@@ -106,12 +106,26 @@ namespace chess_game
 
         private void panelBoard_MouseMove(object sender, MouseEventArgs e)
         {
+            if (dragFrom == -1) return;
 
+            dragPoint = e.Location;
+            panelBoard.Invalidate();
         }
 
         private void panelBoard_MouseUp(object sender, MouseEventArgs e)
         {
+            if (dragFrom == -1) return;
 
+            int to = SquareAt(e.Location);
+            if (to != -1 && to != dragFrom)
+            {
+                // temporary: no rules yet, just move the piece
+                board.Squares[to] = board.Squares[dragFrom];
+                board.Squares[dragFrom] = Piece.None;
+            }
+
+            dragFrom = -1;
+            panelBoard.Invalidate();
         }
     }
 }
