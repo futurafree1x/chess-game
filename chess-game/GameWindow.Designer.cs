@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.panelBoard = new System.Windows.Forms.Panel();
+            this.panelBoard = new BoardPanel();
             this.SuspendLayout();
             // 
             // panelBoard
@@ -57,7 +57,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel panelBoard;
+        private BoardPanel panelBoard;
     }
 }
 
