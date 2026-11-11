@@ -16,26 +16,6 @@ namespace chess_game
 {
     public partial class GameWindow : Form
     {
-        /*
-            1.    Create game window with simple design 
-            2.    Definitions for the game board and pieces 
-            2.1   Graphical representation of board and pieces 
-            3.    Movement for pieces 
-            3.1   Basic movement (drag and drop, etc) 
-            3.2   Define legal moves 
-            3.2.1 special moves 
-                 - castling / 
-                 - en passant
-                 - promotion / 
-            3.3   Alternating turns between white and black 
-            4.    Determining check and checkmate 
-
-        5. QOL
-        5.1. time control 
-        5.2. FEN string reader
-        5.3. move stack
-        5.4. resign button
-        */
         private const int SquareSize = 80;
         private readonly Board board = new Board();
         private readonly Dictionary<Piece, Image> pieceImages = new Dictionary<Piece, Image>();
