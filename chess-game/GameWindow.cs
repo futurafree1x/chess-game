@@ -96,6 +96,12 @@ namespace chess_game
         {
             if (e.Button != MouseButtons.Left) return;
             int square = SquareAt(e.Location);
+            if (square != -1 && board.Squares[square] != Piece.None)
+            {
+                dragFrom = square;
+                dragPoint = e.Location;
+                panelBoard.Invalidate();
+            }
         }
 
         private void panelBoard_MouseMove(object sender, MouseEventArgs e)
