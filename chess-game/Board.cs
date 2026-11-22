@@ -58,7 +58,7 @@ namespace chess_game
             Piece captured = Squares[move.To];
             history.Push((move, captured));
 
-            Squares[move.To] = Squares[move.From];
+            Squares[move.To] = move.Promotion != Piece.None ? move.Promotion : Squares[move.From];
             Squares[move.From] = Piece.None;
 
             SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
@@ -69,7 +69,10 @@ namespace chess_game
 
             var (move, captured) = history.Pop();
 
-            Squares[move.From] = Squares[move.To];
+            if (move.Promotion != Piece.None)
+                Squares[move.From] = move.Promotion.IsWhite() ? Piece.wPawn : Piece.bPawn; // un-promote
+            else
+                Squares[move.From] = Squares[move.To];
             Squares[move.To] = captured;
 
             SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
