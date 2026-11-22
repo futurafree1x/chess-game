@@ -90,6 +90,7 @@ namespace chess_game
                 Squares[rookTo] = Squares[rookFrom];
                 Squares[rookFrom] = Piece.None;
             }
+            CastlingRights &= castlingMask[move.From] & castlingMask[move.To]; // lose rights if king or rook moved or was captured
             SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
         }
         public void UndoMove()
