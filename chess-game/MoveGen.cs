@@ -150,8 +150,8 @@ namespace chess_game
             if (IsSquareAttacked(board, from, enemy)) return;  // can't castle out of check
 
             Piece rook = isWhite ? Piece.wRook : Piece.bRook;
-            bool canKingside = isWhite ? board.WhiteCastleKingside : board.BlackCastleKingside;
-            bool canQueenside = isWhite ? board.WhiteCastleQueenside : board.BlackCastleQueenside;
+            bool canKingside = board.CanCastle(isWhite ? Board.WhiteKingside : Board.BlackKingside);
+            bool canQueenside = board.CanCastle(isWhite ? Board.WhiteQueenside : Board.BlackQueenside);
 
             // kingside: f and g empty, rook on h, king doesn't pass through an attacked f-square
             if (canKingside

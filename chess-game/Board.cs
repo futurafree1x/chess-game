@@ -7,8 +7,9 @@ namespace chess_game
         public const string StartFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; // starting position in FEN notation
         public Piece[] Squares = new Piece[64]; // creates logical board of 64 squares, each square can hold a piece
         public PlayerColour SideToMove = PlayerColour.White;
-        public bool WhiteCastleKingside, WhiteCastleQueenside; // true if castle possible, false if not
-        public bool BlackCastleKingside, BlackCastleQueenside; // ditto
+        public const int WhiteKingside = 1, WhiteQueenside = 2, BlackKingside = 4, BlackQueenside = 8;
+        public int CastlingRights;
+        public bool CanCastle(int right) => (CastlingRights & right) != 0;
         public int EnPassantSquare = -1; // -1 means no en passant square, otherwise it is the index of the square where en passant is possible
         private static readonly Dictionary<char, Piece> fenPieces = new Dictionary<char, Piece>
         {
@@ -43,10 +44,11 @@ namespace chess_game
             SideToMove = parts[1] == "w" ? PlayerColour.White : PlayerColour.Black;
 
             // 3. castling rights
-            WhiteCastleKingside = parts[2].Contains("K");
-            WhiteCastleQueenside = parts[2].Contains("Q");
-            BlackCastleKingside = parts[2].Contains("k");
-            BlackCastleQueenside = parts[2].Contains("q");
+            CastlingRights = 0;
+            if (parts[2].Contains("K")) CastlingRights |= WhiteKingside;
+            if (parts[2].Contains("Q")) CastlingRights |= WhiteQueenside;
+            if (parts[2].Contains("k")) CastlingRights |= BlackKingside;
+            if (parts[2].Contains("q")) CastlingRights |= BlackQueenside;
 
             // 4. en passant square, e.g. "e3", or "-" for none
             EnPassantSquare = parts[3] == "-" ? -1 : (parts[3][1] - '1') * 8 + (parts[3][0] - 'a');
