@@ -10,11 +10,13 @@ namespace chess_game
     {
         public readonly int From;  // square index 0-63
         public readonly int To;    // square index 0-63
+        public readonly Piece Promotion;
 
-        public Move(int from, int to)
+        public Move(int from, int to, Piece promotion = Piece.None)
         {
             From = from;
             To = to;
+            Promotion = promotion;
         }
     }
 }
