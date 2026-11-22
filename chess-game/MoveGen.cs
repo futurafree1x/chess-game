@@ -102,8 +102,9 @@ namespace chess_game
             bool isWhite = board.SideToMove == PlayerColour.White;
             int forward = isWhite ? 8 : -8;   // white moves up the board, black moves down
             int startRank = isWhite ? 1 : 6;
-
+            int ep = board.EnPassantSquare;
             int oneStep = from + forward;
+
             if (oneStep < 0 || oneStep > 63) return; 
             if (board.Squares[oneStep] == Piece.None) // pawns can only push onto empty squares
             {
@@ -115,6 +116,12 @@ namespace chess_game
             int file = from % 8;
             if (file > 0) AddPawnCapture(board, from, oneStep - 1, moves); // towards the a-file
             if (file < 7) AddPawnCapture(board, from, oneStep + 1, moves); // towards the h-file
+
+            if (ep != -1)
+            {
+                if (file > 0 && oneStep - 1 == ep) moves.Add(new Move(from, ep, flag: MoveFlag.EnPassant));
+                if (file < 7 && oneStep + 1 == ep) moves.Add(new Move(from, ep, flag: MoveFlag.EnPassant));
+            }
         }
         // adds a pawn move; on the last rank it adds one move per promotion piece
         private static void AddPawnMove(Board board, int from, int to, List<Move> moves)
@@ -131,12 +138,7 @@ namespace chess_game
             {
                 moves.Add(new Move(from, to));
             }
-            int ep = board.EnPassantSquare;
-            if (ep != -1)
-            {
-                if (file > 0 && oneStep - 1 == ep) moves.Add(new Move(from, ep, flag: MoveFlag.EnPassant));
-                if (file < 7 && oneStep + 1 == ep) moves.Add(new Move(from, ep, flag: MoveFlag.EnPassant));
-            }
+            
         }
 
         private static void AddPawnCapture(Board board, int from, int to, List<Move> moves)
