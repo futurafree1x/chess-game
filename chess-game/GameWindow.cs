@@ -114,7 +114,7 @@ namespace chess_game
 
             dragFrom = square;
             dragPoint = e.Location;
-            legalMoves = MoveGen.GenerateMoves(board);
+            legalMoves = MoveGen.GenerateLegalMoves(board);
             panelBoard.Invalidate();
         }
 

@@ -216,5 +216,20 @@ namespace chess_game
             }
             return moves;
         }
+
+        public static List<Move> GenerateLegalMoves(Board board)
+        {
+            PlayerColour us = board.SideToMove;
+            var legalMoves = new List<Move>();
+
+            foreach (Move move in GenerateMoves(board))
+            {
+                board.MakeMove(move);
+                if (!IsInCheck(board, us)) // our king is safe after this move
+                    legalMoves.Add(move);
+                board.UndoMove();
+            }
+            return legalMoves;
+        }
     }
 }
