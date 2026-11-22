@@ -4,7 +4,8 @@ namespace chess_game
 {
     public static class MoveGen
     {
-
+        private static readonly Piece[] whitePromotions = { Piece.wQueen, Piece.wRook, Piece.wBishop, Piece.wKnight };
+        private static readonly Piece[] blackPromotions = { Piece.bQueen, Piece.bRook, Piece.bBishop, Piece.bKnight };
 
         private static readonly int[][] knightTargets = CalcTargets(
             new[] { 1, 2, 2, 1, -1, -2, -2, -1 },   // file steps
@@ -107,14 +108,30 @@ namespace chess_game
 
             if (board.Squares[oneStep] == Piece.None) // pawns can only push onto empty squares
             {
-                moves.Add(new Move(from, oneStep));
+                AddPawnMove(board, from, oneStep, moves);
                 int twoSteps = oneStep + forward;
                 if (from / 8 == startRank && board.Squares[twoSteps] == Piece.None) // first move, both squares empty
-                    moves.Add(new Move(from, twoSteps));
+                    AddPawnMove(board, from, twoSteps, moves);
             }
             int file = from % 8;
             if (file > 0) AddPawnCapture(board, from, oneStep - 1, moves); // towards the a-file
             if (file < 7) AddPawnCapture(board, from, oneStep + 1, moves); // towards the h-file
+        }
+        // adds a pawn move; on the last rank it adds one move per promotion piece
+        private static void AddPawnMove(Board board, int from, int to, List<Move> moves)
+        {
+            bool isWhite = board.SideToMove == PlayerColour.White;
+            int lastRank = isWhite ? 7 : 0;
+
+            if (to / 8 == lastRank)
+            {
+                foreach (Piece piece in isWhite ? whitePromotions : blackPromotions)
+                    moves.Add(new Move(from, to, piece));
+            }
+            else
+            {
+                moves.Add(new Move(from, to));
+            }
         }
 
         private static void AddPawnCapture(Board board, int from, int to, List<Move> moves)

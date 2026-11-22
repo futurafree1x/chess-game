@@ -136,10 +136,17 @@ namespace chess_game
             int to = SquareAt(e.Location);
             if (to != -1 && to != dragFrom) // dropped on a different square
             {
-                Move move = new Move(dragFrom, to);
-                if (legalMoves.Contains(move))
+                int index = legalMoves.FindIndex(m => m.From == dragFrom && m.To == to);
+
+                if (index != -1 && legalMoves[index].Promotion != Piece.None) // pawn reached the last rank
                 {
-                    board.MakeMove(move);
+                    Piece choice = AskPromotion();
+                    index = legalMoves.FindIndex(m => m.From == dragFrom && m.To == to && m.Promotion == choice);
+                }
+
+                if (index != -1) // a legal move between these squares exists
+                {
+                    board.MakeMove(legalMoves[index]);
                     moved = true;
                 }
             }
@@ -189,6 +196,14 @@ namespace chess_game
             else
             {
                 MessageBox.Show("Stalemate! It's a draw.");
+            }
+        }
+
+        private Piece AskPromotion() // shows the promotion dialog, returns the chosen piece
+        {
+            using (var dialog = new PromoteDialog(board.SideToMove, pieceImages))
+            {
+                return dialog.ShowDialog(this) == DialogResult.OK ? dialog.ChosenPiece : Piece.None;
             }
         }
     }
