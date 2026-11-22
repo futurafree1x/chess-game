@@ -112,6 +112,16 @@ namespace chess_game
                 if (from / 8 == startRank && board.Squares[twoSteps] == Piece.None) // first move, both squares empty
                     moves.Add(new Move(from, twoSteps));
             }
+            int file = from % 8;
+            if (file > 0) AddPawnCapture(board, from, oneStep - 1, moves); // towards the a-file
+            if (file < 7) AddPawnCapture(board, from, oneStep + 1, moves); // towards the h-file
+        }
+
+        private static void AddPawnCapture(Board board, int from, int to, List<Move> moves)
+        {
+            Piece target = board.Squares[to];
+            if (target != Piece.None && target.Colour() != board.SideToMove) // enemy pieces only
+                moves.Add(new Move(from, to));
         }
 
         // every move for the side to move (ignoring check for now)
