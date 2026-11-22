@@ -140,6 +140,41 @@ namespace chess_game
                 AddPawnMove(board, from, to, moves);
         }
 
+        private static void AddCastlingMoves(Board board, int from, List<Move> moves)
+        {
+            bool isWhite = board.SideToMove == PlayerColour.White;
+            int kingStart = isWhite ? 4 : 60;                  // e1 or e8
+            if (from != kingStart) return;                     // king has left its starting square
+
+            PlayerColour enemy = isWhite ? PlayerColour.Black : PlayerColour.White;
+            if (IsSquareAttacked(board, from, enemy)) return;  // can't castle out of check
+
+            Piece rook = isWhite ? Piece.wRook : Piece.bRook;
+            bool canKingside = isWhite ? board.WhiteCastleKingside : board.BlackCastleKingside;
+            bool canQueenside = isWhite ? board.WhiteCastleQueenside : board.BlackCastleQueenside;
+
+            // kingside: f and g empty, rook on h, king doesn't pass through an attacked f-square
+            if (canKingside
+                && board.Squares[from + 3] == rook
+                && board.Squares[from + 1] == Piece.None
+                && board.Squares[from + 2] == Piece.None
+                && !IsSquareAttacked(board, from + 1, enemy))
+            {
+                moves.Add(new Move(from, from + 2, flag: MoveFlag.Castle));
+            }
+
+            // queenside: b, c and d empty, rook on a, king doesn't pass through an attacked d-square
+            if (canQueenside
+                && board.Squares[from - 4] == rook
+                && board.Squares[from - 1] == Piece.None
+                && board.Squares[from - 2] == Piece.None
+                && board.Squares[from - 3] == Piece.None
+                && !IsSquareAttacked(board, from - 1, enemy))
+            {
+                moves.Add(new Move(from, from - 2, flag: MoveFlag.Castle));
+            }
+        }
+
         // true if 'square' is attacked by any piece belonging to 'attacker'
         public static bool IsSquareAttacked(Board board, int square, PlayerColour attacker)
         {
@@ -215,6 +250,7 @@ namespace chess_game
                         break;
                     case PieceType.King:
                         AddStepMoves(board, from, kingTargets[from], moves);
+                        AddCastlingMoves(board, from, moves);
                         break;
                     case PieceType.Rook:
                         AddSlidingMoves(board, from, 0, 3, moves);
