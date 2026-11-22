@@ -24,6 +24,8 @@ namespace chess_game
         private readonly Color darkSquare = Color.FromArgb(48, 71, 94);
         private int dragFrom = -1; // square being dragged from or -1 if none
         private Point dragPoint; // get mouse position during drag
+        private List<Move> legalMoves = new List<Move>();
+        private readonly Image moveDot = Resources.moveDot;
         private int SquareAt(Point p) // helper function to get the square index from a mouse click point, returns -1 if outside the board
         {
             if (p.X < 0 || p.Y < 0 || p.X >= 8 * SquareSize || p.Y >= 8 * SquareSize)
@@ -59,6 +61,7 @@ namespace chess_game
         {
             DrawBoard(e.Graphics);
             DrawPieces(e.Graphics);
+            DrawMoveDots(e.Graphics);
         }
 
         private void DrawBoard(Graphics g) // draws the board with alternating light and dark squares
@@ -109,6 +112,7 @@ namespace chess_game
 
             dragFrom = square;
             dragPoint = e.Location;
+            legalMoves = MoveGenerator.GenerateMoves(board);
             panelBoard.Invalidate();
         }
 
@@ -132,6 +136,19 @@ namespace chess_game
 
             dragFrom = -1;   // stop dragging either way
             panelBoard.Invalidate();
+        }
+        private void DrawMoveDots(Graphics g) // shows where the dragged piece can move
+        {
+            if (dragFrom == -1) return;
+
+            foreach (Move move in legalMoves)
+            {
+                if (move.From != dragFrom) continue;
+
+                int rank = move.To / 8;
+                int file = move.To % 8;
+                g.DrawImage(moveDot, file * SquareSize, (7 - rank) * SquareSize, SquareSize, SquareSize);
+            }
         }
     }
 }
