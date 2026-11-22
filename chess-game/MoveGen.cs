@@ -104,8 +104,7 @@ namespace chess_game
             int startRank = isWhite ? 1 : 6;
 
             int oneStep = from + forward;
-            if (oneStep < 0 || oneStep > 63) return; // pawn on the last rank, only possible until promotion is added
-
+            if (oneStep < 0 || oneStep > 63) return; 
             if (board.Squares[oneStep] == Piece.None) // pawns can only push onto empty squares
             {
                 AddPawnMove(board, from, oneStep, moves);

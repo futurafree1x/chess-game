@@ -51,6 +51,13 @@ namespace chess_game
             // 4. en passant square, e.g. "e3", or "-" for none
             EnPassantSquare = parts[3] == "-" ? -1 : (parts[3][1] - '1') * 8 + (parts[3][0] - 'a');
         }
+        // the rook's start and end squares for a castling move
+        private static void GetCastleRookSquares(Move move, out int rookFrom, out int rookTo)
+        {
+            bool kingside = move.To > move.From;            // king moving towards the h-file
+            rookFrom = kingside ? move.From + 3 : move.From - 4; // h-file or a-file rook
+            rookTo = kingside ? move.From + 1 : move.From - 1; // the square the king passes over
+        }
         private readonly Stack<(Move move, Piece captured)> history = new Stack<(Move move, Piece captured)>();
 
         public void MakeMove(Move move)
@@ -60,7 +67,12 @@ namespace chess_game
 
             Squares[move.To] = move.Promotion != Piece.None ? move.Promotion : Squares[move.From];
             Squares[move.From] = Piece.None;
-
+            if (move.Flag == MoveFlag.Castle) // the rook jumps over the king
+            {
+                GetCastleRookSquares(move, out int rookFrom, out int rookTo);
+                Squares[rookTo] = Squares[rookFrom];
+                Squares[rookFrom] = Piece.None;
+            }
             SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
         }
         public void UndoMove()
@@ -74,7 +86,12 @@ namespace chess_game
             else
                 Squares[move.From] = Squares[move.To];
             Squares[move.To] = captured;
-
+            if (move.Flag == MoveFlag.Castle) // put the rook back in its corner
+            {
+                GetCastleRookSquares(move, out int rookFrom, out int rookTo);
+                Squares[rookFrom] = Squares[rookTo];
+                Squares[rookTo] = Piece.None;
+            }
             SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
         }
     }
