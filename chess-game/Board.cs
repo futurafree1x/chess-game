@@ -10,6 +10,21 @@ namespace chess_game
         public const int WhiteKingside = 1, WhiteQueenside = 2, BlackKingside = 4, BlackQueenside = 8;
         public int CastlingRights;
         public bool CanCastle(int right) => (CastlingRights & right) != 0;
+        // castlingMask[square] = the rights that survive a move from or to that square
+        private static readonly int[] castlingMask = CalcCastlingMask();
+        private static int[] CalcCastlingMask()
+        {
+            var mask = new int[64];
+            for (int i = 0; i < 64; i++) mask[i] = 15; // 15 = binary 1111, keeps every right
+
+            mask[4] = 15 & ~(WhiteKingside | WhiteQueenside); // e1, white king
+            mask[7] = 15 & ~WhiteKingside;                    // h1 rook
+            mask[0] = 15 & ~WhiteQueenside;                   // a1 rook
+            mask[60] = 15 & ~(BlackKingside | BlackQueenside); // e8, black king
+            mask[63] = 15 & ~BlackKingside;                    // h8 rook
+            mask[56] = 15 & ~BlackQueenside;                   // a8 rook
+            return mask;
+        }
         public int EnPassantSquare = -1; // -1 means no en passant square, otherwise it is the index of the square where en passant is possible
         private static readonly Dictionary<char, Piece> fenPieces = new Dictionary<char, Piece>
         {
@@ -60,12 +75,12 @@ namespace chess_game
             rookFrom = kingside ? move.From + 3 : move.From - 4; // h-file or a-file rook
             rookTo = kingside ? move.From + 1 : move.From - 1; // the square the king passes over
         }
-        private readonly Stack<(Move move, Piece captured)> history = new Stack<(Move move, Piece captured)>();
+        private readonly Stack<(Move move, Piece captured, int castlingRights)> history = new Stack<(Move move, Piece captured, int castlingRights)>();
 
         public void MakeMove(Move move)
         {
             Piece captured = Squares[move.To];
-            history.Push((move, captured));
+            history.Push((move, captured, CastlingRights));
 
             Squares[move.To] = move.Promotion != Piece.None ? move.Promotion : Squares[move.From];
             Squares[move.From] = Piece.None;
@@ -81,7 +96,8 @@ namespace chess_game
         {
             if (history.Count == 0) return;
 
-            var (move, captured) = history.Pop();
+            var (move, captured, castlingRights) = history.Pop();
+            CastlingRights = castlingRights;
 
             if (move.Promotion != Piece.None)
                 Squares[move.From] = move.Promotion.IsWhite() ? Piece.wPawn : Piece.bPawn; // un-promote
