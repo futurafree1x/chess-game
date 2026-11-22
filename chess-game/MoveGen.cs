@@ -131,6 +131,12 @@ namespace chess_game
             {
                 moves.Add(new Move(from, to));
             }
+            int ep = board.EnPassantSquare;
+            if (ep != -1)
+            {
+                if (file > 0 && oneStep - 1 == ep) moves.Add(new Move(from, ep, flag: MoveFlag.EnPassant));
+                if (file < 7 && oneStep + 1 == ep) moves.Add(new Move(from, ep, flag: MoveFlag.EnPassant));
+            }
         }
 
         private static void AddPawnCapture(Board board, int from, int to, List<Move> moves)

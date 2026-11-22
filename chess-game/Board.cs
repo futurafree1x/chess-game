@@ -26,6 +26,8 @@ namespace chess_game
             return mask;
         }
         public int EnPassantSquare = -1; // -1 means no en passant square, otherwise it is the index of the square where en passant is possible
+                                         // the pawn taken en passant is on the same rank as the capturer, on the file it lands on
+        private static int EnPassantCaptureSquare(Move move) => move.From / 8 * 8 + move.To % 8;
         private static readonly Dictionary<char, Piece> fenPieces = new Dictionary<char, Piece>
         {
             ['K'] = Piece.wKing,
@@ -94,6 +96,8 @@ namespace chess_game
             }
             CastlingRights &= castlingMask[move.From] & castlingMask[move.To]; // lose rights if king or rook moved or was captured
             bool doublePush = moving.Type() == PieceType.Pawn && System.Math.Abs(move.To - move.From) == 16;
+            if (move.Flag == MoveFlag.EnPassant) // remove the pawn beside us, not the one on the destination
+                Squares[EnPassantCaptureSquare(move)] = Piece.None;
             EnPassantSquare = doublePush ? (move.From + move.To) / 2 : -1;
             SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
         }
@@ -116,6 +120,8 @@ namespace chess_game
                 Squares[rookFrom] = Squares[rookTo];
                 Squares[rookTo] = Piece.None;
             }
+            if (move.Flag == MoveFlag.EnPassant) // put the captured pawn back beside us
+                Squares[EnPassantCaptureSquare(move)] = Squares[move.From] == Piece.wPawn ? Piece.bPawn : Piece.wPawn;
             SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
         }
     }

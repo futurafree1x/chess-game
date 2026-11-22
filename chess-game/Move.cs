@@ -9,7 +9,8 @@ namespace chess_game
     public enum MoveFlag
     {
         None,
-        Castle      // king moves two squares, rook jumps to the other side of it
+        Castle,      // king moves two squares, rook jumps to the other side of it
+        EnPassant
     }
     public readonly struct Move
     {
