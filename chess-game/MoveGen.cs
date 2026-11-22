@@ -129,6 +129,9 @@ namespace chess_game
         {
             bool white = attacker == PlayerColour.White;
             Piece knight = white ? Piece.wKnight : Piece.bKnight;
+            Piece bishop = white ? Piece.wBishop : Piece.bBishop;
+            Piece rook = white ? Piece.wRook : Piece.bRook;
+            Piece queen = white ? Piece.wQueen : Piece.bQueen;
             Piece king = white ? Piece.wKing : Piece.bKing;
 
             // knights and kings: if one sits on a square we could jump to, it can jump to us
@@ -136,7 +139,22 @@ namespace chess_game
                 if (board.Squares[s] == knight) return true;
             foreach (int s in kingTargets[square])
                 if (board.Squares[s] == king) return true;
+            // sliding pieces: walk out from the square in each direction until the first piece
+            for (int dir = 0; dir < 8; dir++)
+            {
+                int s = square;
+                for (int step = 0; step < squaresToEdge[square][dir]; step++)
+                {
+                    s += directionOffsets[dir];
+                    Piece p = board.Squares[s];
+                    if (p == Piece.None) continue; // empty, keep looking
 
+                    bool straight = dir < 4; // directions 0-3 are straight, 4-7 are diagonal
+                    if (p == queen || (straight && p == rook) || (!straight && p == bishop))
+                        return true;
+                    break; // any other piece blocks this direction
+                }
+            }
             return false;
         }
 
