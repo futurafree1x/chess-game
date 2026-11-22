@@ -155,7 +155,7 @@ namespace chess_game
                         return true;
                     break; // any other piece blocks this direction
                 }
-
+            }
                 // pawns: an attacking pawn stands one rank behind the square, on a neighbouring file
                 int behind = square + (white ? -8 : 8);
                 if (behind >= 0 && behind < 64)
@@ -164,7 +164,7 @@ namespace chess_game
                     if (file > 0 && board.Squares[behind - 1] == pawn) return true; // from the a-file side
                     if (file < 7 && board.Squares[behind + 1] == pawn) return true; // from the h-file side
                 }
-            }
+
             return false;
         }
 
