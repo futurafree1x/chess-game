@@ -108,10 +108,10 @@ namespace chess_game
             if (oneStep < 0 || oneStep > 63) return; 
             if (board.Squares[oneStep] == Piece.None) // pawns can only push onto empty squares
             {
-                AddPawnMove(board, from, oneStep, moves);
+                AddPawnMoveOrPromotions(board, from, oneStep, moves);
                 int twoSteps = oneStep + forward;
                 if (from / 8 == startRank && board.Squares[twoSteps] == Piece.None) // first move, both squares empty
-                    AddPawnMove(board, from, twoSteps, moves);
+                    AddPawnMoveOrPromotions(board, from, twoSteps, moves);
             }
             int file = from % 8;
             if (file > 0) AddPawnCapture(board, from, oneStep - 1, moves); // towards the a-file
@@ -124,7 +124,7 @@ namespace chess_game
             }
         }
         // adds a pawn move; on the last rank it adds one move per promotion piece
-        private static void AddPawnMove(Board board, int from, int to, List<Move> moves)
+        private static void AddPawnMoveOrPromotions(Board board, int from, int to, List<Move> moves)
         {
             bool isWhite = board.SideToMove == PlayerColour.White;
             int lastRank = isWhite ? 7 : 0;
@@ -145,7 +145,7 @@ namespace chess_game
         {
             Piece target = board.Squares[to];
             if (target != Piece.None && target.Colour() != board.SideToMove) // enemy pieces only
-                AddPawnMove(board, from, to, moves);
+                AddPawnMoveOrPromotions(board, from, to, moves);
         }
 
         private static void AddCastlingMoves(Board board, int from, List<Move> moves)
