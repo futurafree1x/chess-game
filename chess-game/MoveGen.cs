@@ -14,6 +14,10 @@ namespace chess_game
             new[] { 0, 1, 1, 1, 0, -1, -1, -1 },
             new[] { 1, 1, 0, -1, -1, -1, 0, 1 });
 
+        private static readonly int[] directionOffsets = { 8, -8, 1, -1, 9, 7, -7, -9 }; // N, S, E, W, NE, NW, SE, SW for sliding pieces
+
+        private static readonly int[][] squaresToEdge = CalcSquaresToEdge(); // precomputed table of how many squares to the edge of the board in each direction for each square
+
         private static int[][] CalcTargets(int[] fileSteps, int[] rankSteps)
         {
             var table = new int[64][];
@@ -43,6 +47,55 @@ namespace chess_game
                     moves.Add(new Move(from, to));
             }
         }
+        private static int[][] CalcSquaresToEdge()
+        {
+            var table = new int[64][];
+            for (int square = 0; square < 64; square++)
+            {
+                int file = square % 8;
+                int rank = square / 8;
+
+                int north = 7 - rank;
+                int south = rank;
+                int east = 7 - file;
+                int west = file;
+
+                table[square] = new[]
+                {
+            north, south, east, west,
+            System.Math.Min(north, east),   // NE
+            System.Math.Min(north, west),   // NW
+            System.Math.Min(south, east),   // SE
+            System.Math.Min(south, west)    // SW
+        };
+            }
+            return table;
+        }
+
+        // rook: directions 0-3, bishop: 4-7, queen: 0-7
+        private static void AddSlidingMoves(Board board, int from, int firstDir, int lastDir, List<Move> moves)
+        {
+            for (int dir = firstDir; dir <= lastDir; dir++)
+            {
+                int to = from;
+                for (int step = 0; step < squaresToEdge[from][dir]; step++)
+                {
+                    to += directionOffsets[dir];
+                    Piece target = board.Squares[to];
+
+                    if (target == Piece.None)
+                    {
+                        moves.Add(new Move(from, to));        // empty, keep sliding
+                    }
+                    else
+                    {
+                        if (target.Colour() != board.SideToMove)
+                            moves.Add(new Move(from, to));    // enemy, capture it
+                        break;                                // blocked either way
+                    }
+                }
+            }
+        }
 
         // every move for the side to move (ignoring check for now)
         public static List<Move> GenerateMoves(Board board)
@@ -61,6 +114,15 @@ namespace chess_game
                         break;
                     case PieceType.King:
                         AddStepMoves(board, from, kingTargets[from], moves);
+                        break;
+                    case PieceType.Rook:
+                        AddSlidingMoves(board, from, 0, 3, moves);
+                        break;
+                    case PieceType.Bishop:
+                        AddSlidingMoves(board, from, 4, 7, moves);
+                        break;
+                    case PieceType.Queen:
+                        AddSlidingMoves(board, from, 0, 7, moves);
                         break;
                 }
             }

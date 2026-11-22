@@ -133,11 +133,10 @@ namespace chess_game
             if (to != -1 && to != dragFrom) // dropped on a different square
             {
                 Move move = new Move(dragFrom, to);
-                PieceType type = board.Squares[dragFrom].Type();
-                bool hasMoveGen = type == PieceType.Knight || type == PieceType.King;
+                bool isPawn = board.Squares[dragFrom].Type() == PieceType.Pawn;
 
                 // temporary
-                if (!hasMoveGen || legalMoves.Contains(move))
+                if (isPawn || legalMoves.Contains(move))
                 {
                     board.MakeMove(move);
                 }
