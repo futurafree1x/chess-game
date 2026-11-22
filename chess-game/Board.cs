@@ -75,12 +75,14 @@ namespace chess_game
             rookFrom = kingside ? move.From + 3 : move.From - 4; // h-file or a-file rook
             rookTo = kingside ? move.From + 1 : move.From - 1; // the square the king passes over
         }
-        private readonly Stack<(Move move, Piece captured, int castlingRights)> history = new Stack<(Move move, Piece captured, int castlingRights)>();
+        private readonly Stack<(Move move, Piece captured, int castlingRights, int enPassantSquare)> history = new Stack<(Move move, Piece captured, int castlingRights, int enPassantSquare)>();
 
         public void MakeMove(Move move)
         {
+            Piece moving = Squares[move.From];
             Piece captured = Squares[move.To];
-            history.Push((move, captured, CastlingRights));
+            
+            history.Push((move, captured, CastlingRights, EnPassantSquare));
 
             Squares[move.To] = move.Promotion != Piece.None ? move.Promotion : Squares[move.From];
             Squares[move.From] = Piece.None;
@@ -91,14 +93,17 @@ namespace chess_game
                 Squares[rookFrom] = Piece.None;
             }
             CastlingRights &= castlingMask[move.From] & castlingMask[move.To]; // lose rights if king or rook moved or was captured
+            bool doublePush = moving.Type() == PieceType.Pawn && System.Math.Abs(move.To - move.From) == 16;
+            EnPassantSquare = doublePush ? (move.From + move.To) / 2 : -1;
             SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
         }
         public void UndoMove()
         {
             if (history.Count == 0) return;
 
-            var (move, captured, castlingRights) = history.Pop();
+            var (move, captured, castlingRights, enPassantSquare) = history.Pop();
             CastlingRights = castlingRights;
+            EnPassantSquare = enPassantSquare;
 
             if (move.Promotion != Piece.None)
                 Squares[move.From] = move.Promotion.IsWhite() ? Piece.wPawn : Piece.bPawn; // un-promote
