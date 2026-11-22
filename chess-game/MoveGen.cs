@@ -138,7 +138,7 @@ namespace chess_game
         {
             Piece target = board.Squares[to];
             if (target != Piece.None && target.Colour() != board.SideToMove) // enemy pieces only
-                moves.Add(new Move(from, to));
+                AddPawnMove(board, from, to, moves);
         }
 
         // true if 'square' is attacked by any piece belonging to 'attacker'
