@@ -100,18 +100,21 @@ namespace chess_game
         private void panelBoard_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left) return;
+
             int square = SquareAt(e.Location);
-            if (square != -1 && board.Squares[square] != Piece.None)
-            {
-                dragFrom = square;
-                dragPoint = e.Location;
-                panelBoard.Invalidate();
-            }
+            if (square == -1) return; // clicked outside board
+            Piece piece = board.Squares[square];
+            if (piece == Piece.None) return; // empty square
+            if (piece.Colour() != board.SideToMove) return; // not this player's turn
+
+            dragFrom = square;
+            dragPoint = e.Location;
+            panelBoard.Invalidate();
         }
 
         private void panelBoard_MouseMove(object sender, MouseEventArgs e)
         {
-            if (dragFrom == -1) return;
+            if (dragFrom == -1) return; // not dragging anything
 
             dragPoint = e.Location;
             panelBoard.Invalidate();
@@ -119,17 +122,15 @@ namespace chess_game
 
         private void panelBoard_MouseUp(object sender, MouseEventArgs e)
         {
-            if (dragFrom == -1) return;
+            if (dragFrom == -1) return;  // not dragging anything
 
             int to = SquareAt(e.Location);
-            if (to != -1 && to != dragFrom)
+            if (to != -1 && to != dragFrom) // dropped on a different square
             {
-                // temporary: no rules yet, just move the piece
-                board.Squares[to] = board.Squares[dragFrom];
-                board.Squares[dragFrom] = Piece.None;
+                board.MakeMove(new Move(dragFrom, to));
             }
 
-            dragFrom = -1;
+            dragFrom = -1;   // stop dragging either way
             panelBoard.Invalidate();
         }
     }

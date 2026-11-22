@@ -51,5 +51,28 @@ namespace chess_game
             // 4. en passant square, e.g. "e3", or "-" for none
             EnPassantSquare = parts[3] == "-" ? -1 : (parts[3][1] - '1') * 8 + (parts[3][0] - 'a');
         }
+        private readonly Stack<(Move move, Piece captured)> history = new Stack<(Move move, Piece captured)>();
+
+        public void MakeMove(Move move)
+        {
+            Piece captured = Squares[move.To];
+            history.Push((move, captured));
+
+            Squares[move.To] = Squares[move.From];
+            Squares[move.From] = Piece.None;
+
+            SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
+        }
+        public void UndoMove()
+        {
+            if (history.Count == 0) return;
+
+            var (move, captured) = history.Pop();
+
+            Squares[move.From] = Squares[move.To];
+            Squares[move.To] = captured;
+
+            SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
+        }
     }
 }
