@@ -4,7 +4,7 @@ namespace chess_game
 {
     public static class MoveGen
     {
-        
+
 
         private static readonly int[][] knightTargets = CalcTargets(
             new[] { 1, 2, 2, 1, -1, -2, -2, -1 },   // file steps

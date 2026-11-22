@@ -19,7 +19,7 @@ namespace chess_game
         private const int SquareSize = 80;
         private readonly Board board = new Board();
         private readonly Dictionary<Piece, Image> pieceImages = new Dictionary<Piece, Image>();
-        
+
         private readonly Color lightSquare = Color.FromArgb(221, 221, 221);
         private readonly Color darkSquare = Color.FromArgb(48, 71, 94);
         private int dragFrom = -1; // square being dragged from or -1 if none
@@ -62,7 +62,7 @@ namespace chess_game
             DrawBoard(e.Graphics);
             DrawMoveDots(e.Graphics);
             DrawPieces(e.Graphics);
-            
+
         }
 
         private void DrawBoard(Graphics g) // draws the board with alternating light and dark squares
@@ -98,7 +98,7 @@ namespace chess_game
                 g.DrawImage(pieceImages[board.Squares[dragFrom]],
                  dragPoint.X - SquareSize / 2, dragPoint.Y - SquareSize / 2, SquareSize, SquareSize);
             }
-            
+
         }
 
         private void panelBoard_MouseDown(object sender, MouseEventArgs e)
