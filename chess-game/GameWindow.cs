@@ -60,8 +60,9 @@ namespace chess_game
         private void panelBoard_Paint(object sender, PaintEventArgs e) // draw the chessboard
         {
             DrawBoard(e.Graphics);
-            DrawPieces(e.Graphics);
             DrawMoveDots(e.Graphics);
+            DrawPieces(e.Graphics);
+            
         }
 
         private void DrawBoard(Graphics g) // draws the board with alternating light and dark squares
