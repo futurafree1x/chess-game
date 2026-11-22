@@ -100,12 +100,18 @@ namespace chess_game
         {
             bool isWhite = board.SideToMove == PlayerColour.White;
             int forward = isWhite ? 8 : -8;   // white moves up the board, black moves down
+            int startRank = isWhite ? 1 : 6;
 
             int oneStep = from + forward;
             if (oneStep < 0 || oneStep > 63) return; // pawn on the last rank, only possible until promotion is added
 
             if (board.Squares[oneStep] == Piece.None) // pawns can only push onto empty squares
+            {
                 moves.Add(new Move(from, oneStep));
+                int twoSteps = oneStep + forward;
+                if (from / 8 == startRank && board.Squares[twoSteps] == Piece.None) // first move, both squares empty
+                    moves.Add(new Move(from, twoSteps));
+            }
         }
 
         // every move for the side to move (ignoring check for now)
