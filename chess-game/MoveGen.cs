@@ -96,6 +96,17 @@ namespace chess_game
                 }
             }
         }
+        private static void AddPawnMoves(Board board, int from, List<Move> moves)
+        {
+            bool isWhite = board.SideToMove == PlayerColour.White;
+            int forward = isWhite ? 8 : -8;   // white moves up the board, black moves down
+
+            int oneStep = from + forward;
+            if (oneStep < 0 || oneStep > 63) return; // pawn on the last rank, only possible until promotion is added
+
+            if (board.Squares[oneStep] == Piece.None) // pawns can only push onto empty squares
+                moves.Add(new Move(from, oneStep));
+        }
 
         // every move for the side to move (ignoring check for now)
         public static List<Move> GenerateMoves(Board board)
@@ -123,6 +134,9 @@ namespace chess_game
                         break;
                     case PieceType.Queen:
                         AddSlidingMoves(board, from, 0, 7, moves);
+                        break;
+                    case PieceType.Pawn:
+                        AddPawnMoves(board, from, moves);
                         break;
                 }
             }
