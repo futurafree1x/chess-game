@@ -60,6 +60,7 @@ namespace chess_game
         private void panelBoard_Paint(object sender, PaintEventArgs e) // draw the chessboard
         {
             DrawBoard(e.Graphics);
+            DrawCheck(e.Graphics);
             DrawMoveDots(e.Graphics);
             DrawPieces(e.Graphics);
 
@@ -153,6 +154,18 @@ namespace chess_game
                 int rank = move.To / 8;
                 int file = move.To % 8;
                 g.DrawImage(moveDot, file * SquareSize, (7 - rank) * SquareSize, SquareSize, SquareSize);
+            }
+        }
+        private void DrawCheck(Graphics g) // red square under the king of the side to move if it is in check
+        {
+            if (!MoveGen.IsInCheck(board, board.SideToMove)) return;
+
+            int king = MoveGen.FindKing(board, board.SideToMove);
+            int rank = king / 8;
+            int file = king % 8;
+            using (var red = new SolidBrush(Color.FromArgb(200, 220, 50, 50)))
+            {
+                g.FillRectangle(red, file * SquareSize, (7 - rank) * SquareSize, SquareSize, SquareSize);
             }
         }
     }

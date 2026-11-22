@@ -124,7 +124,37 @@ namespace chess_game
                 moves.Add(new Move(from, to));
         }
 
-        // every move for the side to move (ignoring check for now)
+        // true if 'square' is attacked by any piece belonging to 'attacker'
+        public static bool IsSquareAttacked(Board board, int square, PlayerColour attacker)
+        {
+            bool white = attacker == PlayerColour.White;
+            Piece knight = white ? Piece.wKnight : Piece.bKnight;
+            Piece king = white ? Piece.wKing : Piece.bKing;
+
+            // knights and kings: if one sits on a square we could jump to, it can jump to us
+            foreach (int s in knightTargets[square])
+                if (board.Squares[s] == knight) return true;
+            foreach (int s in kingTargets[square])
+                if (board.Squares[s] == king) return true;
+
+            return false;
+        }
+
+        public static int FindKing(Board board, PlayerColour colour)
+        {
+            Piece king = colour == PlayerColour.White ? Piece.wKing : Piece.bKing;
+            for (int i = 0; i < 64; i++)
+                if (board.Squares[i] == king) return i;
+            return -1; // no king on the board
+        }
+
+        public static bool IsInCheck(Board board, PlayerColour colour)
+        {
+            int kingSquare = FindKing(board, colour);
+            PlayerColour enemy = colour == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
+            return kingSquare != -1 && IsSquareAttacked(board, kingSquare, enemy);
+        }
+
         public static List<Move> GenerateMoves(Board board)
         {
             var moves = new List<Move>();
