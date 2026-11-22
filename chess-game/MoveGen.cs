@@ -2,7 +2,7 @@
 
 namespace chess_game
 {
-    public static class MoveGenerator
+    public static class MoveGen
     {
         // knightTargets[square] = every square a knight on that square can jump to.
         // Worked out once when the program starts, so the game only looks them up.
