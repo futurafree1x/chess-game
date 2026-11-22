@@ -132,6 +132,7 @@ namespace chess_game
             Piece bishop = white ? Piece.wBishop : Piece.bBishop;
             Piece rook = white ? Piece.wRook : Piece.bRook;
             Piece queen = white ? Piece.wQueen : Piece.bQueen;
+            Piece pawn = white ? Piece.wPawn : Piece.bPawn;
             Piece king = white ? Piece.wKing : Piece.bKing;
 
             // knights and kings: if one sits on a square we could jump to, it can jump to us
@@ -153,6 +154,15 @@ namespace chess_game
                     if (p == queen || (straight && p == rook) || (!straight && p == bishop))
                         return true;
                     break; // any other piece blocks this direction
+                }
+
+                // pawns: an attacking pawn stands one rank behind the square, on a neighbouring file
+                int behind = square + (white ? -8 : 8);
+                if (behind >= 0 && behind < 64)
+                {
+                    int file = square % 8;
+                    if (file > 0 && board.Squares[behind - 1] == pawn) return true; // from the a-file side
+                    if (file < 7 && board.Squares[behind + 1] == pawn) return true; // from the h-file side
                 }
             }
             return false;
