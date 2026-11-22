@@ -4,15 +4,18 @@ namespace chess_game
 {
     public static class MoveGen
     {
-        // knightTargets[square] = every square a knight on that square can jump to.
-        // Worked out once when the program starts, so the game only looks them up.
-        private static readonly int[][] knightTargets = CalcKnightTargets();
+        
 
-        private static int[][] CalcKnightTargets()
+        private static readonly int[][] knightTargets = CalcTargets(
+            new[] { 1, 2, 2, 1, -1, -2, -2, -1 },   // file steps
+            new[] { 2, 1, -1, -2, -2, -1, 1, 2 });  // rank steps
+
+        private static readonly int[][] kingTargets = CalcTargets(
+            new[] { 0, 1, 1, 1, 0, -1, -1, -1 },
+            new[] { 1, 1, 0, -1, -1, -1, 0, 1 });
+
+        private static int[][] CalcTargets(int[] fileSteps, int[] rankSteps)
         {
-            int[] fileSteps = { 1, 2, 2, 1, -1, -2, -2, -1 };
-            int[] rankSteps = { 2, 1, -1, -2, -2, -1, 1, 2 };
-
             var table = new int[64][];
             for (int square = 0; square < 64; square++)
             {
@@ -20,7 +23,7 @@ namespace chess_game
                 int rank = square / 8;
                 var targets = new List<int>();
 
-                for (int i = 0; i < 8; i++)
+                for (int i = 0; i < fileSteps.Length; i++)
                 {
                     int f = file + fileSteps[i];
                     int r = rank + rankSteps[i];
@@ -30,6 +33,15 @@ namespace chess_game
                 table[square] = targets.ToArray();
             }
             return table;
+        }
+        private static void AddStepMoves(Board board, int from, int[] targets, List<Move> moves)
+        {
+            foreach (int to in targets)
+            {
+                Piece target = board.Squares[to];
+                if (target == Piece.None || target.Colour() != board.SideToMove) // empty or enemy
+                    moves.Add(new Move(from, to));
+            }
         }
 
         // every move for the side to move (ignoring check for now)
@@ -46,6 +58,9 @@ namespace chess_game
                 {
                     case PieceType.Knight:
                         AddKnightMoves(board, from, moves);
+                        break;
+                    case PieceType.King:
+                        AddStepMoves(board, from, kingTargets[from], moves);
                         break;
                 }
             }

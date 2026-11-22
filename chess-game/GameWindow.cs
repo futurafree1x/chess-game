@@ -131,7 +131,15 @@ namespace chess_game
             int to = SquareAt(e.Location);
             if (to != -1 && to != dragFrom) // dropped on a different square
             {
-                board.MakeMove(new Move(dragFrom, to));
+                Move move = new Move(dragFrom, to);
+                PieceType type = board.Squares[dragFrom].Type();
+                bool hasMoveGen = type == PieceType.Knight || type == PieceType.King;
+
+                // temporary
+                if (!hasMoveGen || legalMoves.Contains(move))
+                {
+                    board.MakeMove(move);
+                }
             }
 
             dragFrom = -1;   // stop dragging either way
