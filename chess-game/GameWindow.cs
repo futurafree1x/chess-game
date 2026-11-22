@@ -26,6 +26,7 @@ namespace chess_game
         private Point dragPoint; // get mouse position during drag
         private List<Move> legalMoves = new List<Move>();
         private readonly Image moveDot = Resources.moveDot;
+        private bool gameOver = false;
         private int SquareAt(Point p) // helper function to get the square index from a mouse click point, returns -1 if outside the board
         {
             if (p.X < 0 || p.Y < 0 || p.X >= 8 * SquareSize || p.Y >= 8 * SquareSize)
@@ -104,6 +105,7 @@ namespace chess_game
 
         private void panelBoard_MouseDown(object sender, MouseEventArgs e)
         {
+            if (gameOver) return;
             if (e.Button != MouseButtons.Left) return;
 
             int square = SquareAt(e.Location);
@@ -130,6 +132,7 @@ namespace chess_game
         {
             if (dragFrom == -1) return;  // not dragging anything
 
+            bool moved = false;
             int to = SquareAt(e.Location);
             if (to != -1 && to != dragFrom) // dropped on a different square
             {
@@ -137,11 +140,13 @@ namespace chess_game
                 if (legalMoves.Contains(move))
                 {
                     board.MakeMove(move);
+                    moved = true;
                 }
             }
 
             dragFrom = -1;   // stop dragging either way
             panelBoard.Invalidate();
+            if (moved) CheckGameOver();
         }
         private void DrawMoveDots(Graphics g) // shows where the dragged piece can move
         {
@@ -166,6 +171,24 @@ namespace chess_game
             using (var red = new SolidBrush(Color.FromArgb(200, 220, 50, 50)))
             {
                 g.FillRectangle(red, file * SquareSize, (7 - rank) * SquareSize, SquareSize, SquareSize);
+            }
+        }
+
+        private void CheckGameOver() // ends the game if the player to move has no legal moves
+        {
+            if (MoveGen.GenerateLegalMoves(board).Count > 0) return; // game continues
+
+            gameOver = true;
+            panelBoard.Refresh(); // draw the final position before the message box appears
+
+            if (MoveGen.IsInCheck(board, board.SideToMove))
+            {
+                string winner = board.SideToMove == PlayerColour.White ? "Black" : "White";
+                MessageBox.Show($"Checkmate! {winner} wins.");
+            }
+            else
+            {
+                MessageBox.Show("Stalemate! It's a draw.");
             }
         }
     }
