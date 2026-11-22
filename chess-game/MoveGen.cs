@@ -57,7 +57,7 @@ namespace chess_game
                 switch (piece.Type())
                 {
                     case PieceType.Knight:
-                        AddKnightMoves(board, from, moves);
+                        AddStepMoves(board, from, knightTargets[from], moves);
                         break;
                     case PieceType.King:
                         AddStepMoves(board, from, kingTargets[from], moves);
@@ -65,16 +65,6 @@ namespace chess_game
                 }
             }
             return moves;
-        }
-
-        private static void AddKnightMoves(Board board, int from, List<Move> moves)
-        {
-            foreach (int to in knightTargets[from])
-            {
-                Piece target = board.Squares[to];
-                if (target == Piece.None || target.Colour() != board.SideToMove) // empty or enemy
-                    moves.Add(new Move(from, to));
-            }
         }
     }
 }
