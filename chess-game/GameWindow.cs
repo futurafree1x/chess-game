@@ -196,7 +196,7 @@ namespace chess_game
         {
             if (gameOver || board.SideToMove != engineColour) return;
 
-            Move move = Search.Think(board, 5); // change the int to change engine depth
+            Move move = Search.Think(board, 20, 1000); // think for ~1 second at MOST depth 20
             board.MakeMove(move);
             UpdateTitle();
             panelBoard.Invalidate();

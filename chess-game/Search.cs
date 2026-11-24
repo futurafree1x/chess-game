@@ -13,12 +13,15 @@ namespace chess_game
         private const int MateScore = 100000; // smaller than infinity, bigger than any evaluation
         private static readonly int[] orderValues = { 0, 10, 1, 3, 3, 5, 9 };// rough piece values usedfor ordering: None, King, Pawn, Knight, Bishop, Rook, Queen
 
-        public static Move Think(Board board, int maxDepth)
+        public static Move Think(Board board, int maxDepth, int timeLimitMs)
         {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             Move bestMove = default;
+
             for (int depth = 1; depth <= maxDepth; depth++)
             {
                 bestMove = FindBestMove(board, depth);
+                if (timer.ElapsedMilliseconds >= timeLimitMs / 2) break;
             }
             return bestMove;
         }
