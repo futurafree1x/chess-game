@@ -50,7 +50,7 @@ namespace chess_game
             {
                 if (MoveGen.IsInCheck(board, board.SideToMove) && MoveGen.GenerateLegalMoves(board).Count == 0)
                     return -MateScore + ply;
-                return EvaluateForSideToMove(board);
+                return Quiescence(board, alpha, beta);
             }
 
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
@@ -72,6 +72,12 @@ namespace chess_game
             }
             return bestScore;
         }
+
+        private static int Quiescence(Board board, int alpha, int beta)
+        {
+            return EvaluateForSideToMove(board);
+        }
+
         private static int EvaluateForSideToMove(Board board) 
         {
             int score = Evaluation.Evaluate(board);
