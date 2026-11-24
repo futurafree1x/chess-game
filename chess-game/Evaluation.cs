@@ -177,7 +177,17 @@ namespace chess_game
                         result[p][square] = -(values[type] + tables[type][square]); 
                 }
             }
+            return result;
+        }
 
+        private static int[] BuildPhaseTable() // phase weight indexed by Piece
+        {
+            var result = new int[13];
+            for (int p = 1; p <13; p++)
+            {
+                result[p] = phaseWeights[(int)((Piece)p).Type()];
+            }
+            return result;
         }
     }
 }
