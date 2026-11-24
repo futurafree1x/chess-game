@@ -8,12 +8,10 @@ namespace chess_game
 {
     public static class Evaluation
     {
-        private static readonly int[] pieceValues =
-        {
-            0, // none
-            0, 100, 320, 330, 500, 900, // white pieces: King, Pawn, Knight, Bishop, Rook, Queen
-            0, -100, -320, -330, -500, -900 // black pieces: King, Pawn, Knight, Bishop, Rook, Queen
-        };
+        // material by PieceType; None, King, Pawn, Knight, Bishop, Rook, Queen
+        private static readonly int[] mgValues = { 0, 0, 82, 337, 365, 477, 1025 };
+        private static readonly int[] egValues = { 0, 0, 94, 281, 297, 512, 936 };
+            
         
         public static int Evaluate(Board board)
         {
