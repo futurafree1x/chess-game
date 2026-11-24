@@ -11,6 +11,7 @@ namespace chess_game
     {
         private const int Infinity = 1000000;
         private const int MateScore = 100000; // smaller than infinity, bigger than any evaluation
+        private static readonly int[] orderValues = { 0, 10, 1, 3, 3, 5, 9 };// rough piece values usedfor ordering: None, King, Pawn, Knight, Bishop, Rook, Queen
         public static Move FindBestMove(Board board, int depth) // finds the best move, (depth) moves ahead
         {
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
@@ -34,8 +35,16 @@ namespace chess_game
             }
             return bestMove;
         }
-        // best score the side to move can reach, looking (depth) moves ahead
-        private static int Negamax(Board board, int depth, int ply, int alpha, int beta)
+        private static int MoveOrderScore(Board board, Move move)
+        {
+            if (!IsCapture(board, move)) return 0; // quiet moves go last
+
+            int victim = move.Flag == MoveFlag.EnPassant ? 1 : orderValues[(int)board.Squares[move.To].Type()];
+            int attacker = orderValues[(int)board.Squares[move.From].Type()];
+            return 100 + 10 * victim - attacker; //100 keeps every capture above every quiet move
+        }
+       
+        private static int Negamax(Board board, int depth, int ply, int alpha, int beta)  // best score the side to move can reach, looking (depth) moves ahead
         {
             if (depth == 0)
             {
@@ -74,7 +83,7 @@ namespace chess_game
         }
         private static void OrderMoves(Board board, List<Move> moves)
         {
-            moves.Sort((a, b) => IsCapture(board, b).CompareTo(IsCapture(board, a)));
+            moves.Sort((a, b) => MoveOrderScore(board, b).CompareTo(MoveOrderScore(board, a)));
         }
 
     }
