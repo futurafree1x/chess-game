@@ -14,6 +14,7 @@ namespace chess_game
         public static Move FindBestMove(Board board, int depth) // finds the best move, (depth) moves ahead
         {
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
+            OrderMoves(board, moves);
             Move bestMove = moves[0];
             int bestScore = -Infinity;
             int alpha = -Infinity, beta = Infinity;
@@ -42,9 +43,12 @@ namespace chess_game
                     return -MateScore + ply;
                 return EvaluateForSideToMove(board);
             }
+
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
             if (moves.Count == 0) // no legal moves
                 return MoveGen.IsInCheck(board, board.SideToMove) ? -MateScore + ply : 0;
+
+            OrderMoves(board, moves);
 
             int bestScore = -Infinity;
             foreach (Move move in moves)
@@ -63,6 +67,14 @@ namespace chess_game
         {
             int score = Evaluation.Evaluate(board);
             return board.SideToMove == PlayerColour.White ? score : -score;
+        }
+        private static bool IsCapture(Board board, Move move)
+        {
+            return board.Squares[move.To] != Piece.None || move.Flag == MoveFlag.EnPassant;
+        }
+        private static void OrderMoves(Board board, List<Move> moves)
+        {
+            moves.Sort((a, b) => IsCapture(board, b).CompareTo(IsCapture(board, a)));
         }
 
     }
