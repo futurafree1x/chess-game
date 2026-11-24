@@ -8,12 +8,12 @@ namespace chess_game
 {
     public static class Search
     {
-        private const int infinity = 1000000;
-        public static Move FindBestMove(Board board, int depth) // finds the best move, one move ahead
+        private const int Infinity = 1000000;
+        public static Move FindBestMove(Board board, int depth) // finds the best move, (depth) moves ahead
         {
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
             Move bestMove = moves[0];
-            int bestScore = -infinity;
+            int bestScore = -Infinity;
 
             foreach (Move move in moves)
             {
@@ -34,7 +34,7 @@ namespace chess_game
         {
             if (depth == 0) return EvaluateForSideToMove(board);
 
-            int bestScore = -infinity;
+            int bestScore = -Infinity;
             foreach (Move move in MoveGen.GenerateLegalMoves(board))
             {
                 board.MakeMove(move);
