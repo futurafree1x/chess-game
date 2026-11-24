@@ -33,6 +33,7 @@ namespace chess_game
                 if (stopped) break;
                 bestMove = move;
             }
+            stopTimeMs = long.MaxValue;
             return bestMove;
         }
 
