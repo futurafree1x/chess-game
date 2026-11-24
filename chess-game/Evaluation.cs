@@ -9,8 +9,9 @@ namespace chess_game
     public static class Evaluation
     {
         // material by PieceType; None, King, Pawn, Knight, Bishop, Rook, Queen
-        private static readonly int[] mgValues = { 0, 0, 82, 337, 365, 477, 1025 };
-        private static readonly int[] egValues = { 0, 0, 94, 281, 297, 512, 936 };
+        private static readonly int[] mgValues = { 0, 0, 82, 337, 365, 477, 1025 }; // piece value in middle game phase
+        private static readonly int[] egValues = { 0, 0, 94, 281, 297, 512, 936 }; // piece value in end game phase
+        private static readonly int[] phaseWeights = { 0, 0, 0, 1, 1, 2, 4 }; // how much eah piece type counts towards game phase
 
         #region PeSTO tables
         private static readonly int[] mgPawnTable =
@@ -150,14 +151,33 @@ namespace chess_game
         };
         #endregion
 
-        public static int Evaluate(Board board)
+        private static readonly int[][] mgTables =
+            { null, mgKingTable, mgPawnTable, mgKnightTable, mgBishopTable, mgRookTable, mgQueenTable }; // better than a switch with 6 cases
+        private static readonly int[][] egTables =
+            { null, egKingTable, egPawnTable, egKnightTable, egBishopTable, egRookTable, egQueenTable };
+        private static readonly int[][] mgScore = BuildScoreTable(mgValues, mgTables); // one array lookup per square rather than working out type, sign and flip each time
+        private static readonly int[][] egScore = BuildScoreTable(egValues, egTables);
+        private static readonly int[] piecePhase = BuildPhaseTable();
+
+        private static int[][] BuildScoreTable(int[] values, int[][] tables) // build mgScore and egScore
         {
-            int score = 0;
-            for (int square = 0; square < 64; square++)
+            var result = new int[13][];
+            for (int p = 0; p < 13; p++)
             {
-                score += pieceValues[(int)board.Squares[square]];
+                result[p] = new int[64];
+                Piece piece = (Piece)p;
+                if (piece == Piece.None) continue; // empty squares keep their row of zeros
+
+                int type = (int)piece.Type();
+                for (int square = 0; square < 64; square++)
+                {
+                    if (piece.IsWhite())
+                        result[p][square] = values[type] + tables[type][square ^ 56]; // flips the rank
+                    else
+                        result[p][square] = -(values[type] + tables[type][square]); 
+                }
             }
-            return score;
+
         }
     }
 }
