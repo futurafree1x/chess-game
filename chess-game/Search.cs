@@ -75,7 +75,22 @@ namespace chess_game
 
         private static int Quiescence(Board board, int alpha, int beta)
         {
-            return EvaluateForSideToMove(board);
+            int standPat = EvaluateForSideToMove(board); // score if we stop capturing now
+            if (standPat >= beta) return standPat;        // already too good, the opponent won't allow this
+            if (standPat > alpha) alpha = standPat;       // stopping is always allowed
+
+            foreach (Move move in MoveGen.GenerateLegalMoves(board))
+            {
+                if (!IsCapture(board, move)) continue;    // only captures are searched here
+
+                board.MakeMove(move);
+                int score = -Quiescence(board, -beta, -alpha);
+                board.UndoMove();
+
+                if (score >= beta) return score;          // opponent won't allow this, stop searching
+                if (score > alpha) alpha = score;         // best capture sequence so far
+            }
+            return alpha;
         }
 
         private static int EvaluateForSideToMove(Board board) 
