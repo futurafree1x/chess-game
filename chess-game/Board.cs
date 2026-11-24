@@ -27,6 +27,7 @@ namespace chess_game
         }
         public int EnPassantSquare = -1; // -1 means no en passant square, otherwise it is the index of the square where en passant is possible
                                          // the pawn taken en passant is on the same rank as the capturer, on the file it lands on
+        public ulong Hash;
         private static int EnPassantCaptureSquare(Move move) => move.From / 8 * 8 + move.To % 8;
         private static readonly Dictionary<char, Piece> fenPieces = new Dictionary<char, Piece>
         {
@@ -69,6 +70,7 @@ namespace chess_game
 
             // 4. en passant square, e.g. "e3", or "-" for none
             EnPassantSquare = parts[3] == "-" ? -1 : (parts[3][1] - '1') * 8 + (parts[3][0] - 'a');
+            Hash = Zobrist.Compute(this);
         }
         // the rook's start and end squares for a castling move
         private static void GetCastleRookSquares(Move move, out int rookFrom, out int rookTo)
@@ -77,35 +79,57 @@ namespace chess_game
             rookFrom = kingside ? move.From + 3 : move.From - 4; // h-file or a-file rook
             rookTo = kingside ? move.From + 1 : move.From - 1; // the square the king passes over
         }
-        private readonly Stack<(Move move, Piece captured, int castlingRights, int enPassantSquare)> history = new Stack<(Move move, Piece captured, int castlingRights, int enPassantSquare)>();
+        private readonly Stack<(Move move, Piece captured, int castlingRights, int enPassantSquare, ulong hash)> history = new Stack<(Move move, Piece captured, int castlingRights, int enPassantSquare, ulong hash)>();
 
         public void MakeMove(Move move)
         {
             Piece moving = Squares[move.From];
             Piece captured = Squares[move.To];
-            
-            history.Push((move, captured, CastlingRights, EnPassantSquare));
 
-            Squares[move.To] = move.Promotion != Piece.None ? move.Promotion : Squares[move.From];
+            history.Push((move, captured, CastlingRights, EnPassantSquare, Hash));
+
+            // hash: XOR-ing a number in adds a feature, XOR-ing the same number again removes it
+            Piece placed = move.Promotion != Piece.None ? move.Promotion : moving;
+            Hash ^= Zobrist.PieceSquare[(int)moving, move.From];                               // piece leaves its square
+            if (captured != Piece.None) Hash ^= Zobrist.PieceSquare[(int)captured, move.To];  // captured piece disappears
+            Hash ^= Zobrist.PieceSquare[(int)placed, move.To];                                // piece (or promoted piece) arrives
+
+            Squares[move.To] = placed;
             Squares[move.From] = Piece.None;
             if (move.Flag == MoveFlag.Castle) // the rook jumps over the king
             {
                 GetCastleRookSquares(move, out int rookFrom, out int rookTo);
+                Hash ^= Zobrist.PieceSquare[(int)Squares[rookFrom], rookFrom] ^ Zobrist.PieceSquare[(int)Squares[rookFrom], rookTo];
                 Squares[rookTo] = Squares[rookFrom];
                 Squares[rookFrom] = Piece.None;
             }
-            CastlingRights &= castlingMask[move.From] & castlingMask[move.To]; // lose rights if king or rook moved or was captured
-            bool doublePush = moving.Type() == PieceType.Pawn && System.Math.Abs(move.To - move.From) == 16;
             if (move.Flag == MoveFlag.EnPassant) // remove the pawn beside us, not the one on the destination
-                Squares[EnPassantCaptureSquare(move)] = Piece.None;
+            {
+                int pawnSquare = EnPassantCaptureSquare(move);
+                Hash ^= Zobrist.PieceSquare[(int)Squares[pawnSquare], pawnSquare];
+                Squares[pawnSquare] = Piece.None;
+            }
+
+            Hash ^= Zobrist.Castling[CastlingRights]; // remove the old rights from the hash...
+            CastlingRights &= castlingMask[move.From] & castlingMask[move.To]; // lose rights if king or rook moved or was captured
+            Hash ^= Zobrist.Castling[CastlingRights]; // ...and add the new ones
+
+            if (EnPassantSquare != -1) Hash ^= Zobrist.EnPassantFile[EnPassantSquare % 8]; // old en passant file out
+            bool doublePush = moving.Type() == PieceType.Pawn && System.Math.Abs(move.To - move.From) == 16;
             EnPassantSquare = doublePush ? (move.From + move.To) / 2 : -1;
+            if (EnPassantSquare != -1) Hash ^= Zobrist.EnPassantFile[EnPassantSquare % 8]; // new en passant file in
+
             SideToMove = SideToMove == PlayerColour.White ? PlayerColour.Black : PlayerColour.White;
+            Hash ^= Zobrist.BlackToMove; // the side to move always changes
         }
         public void UndoMove()
         {
             if (history.Count == 0) return;
 
-            var (move, captured, castlingRights, enPassantSquare) = history.Pop();
+            var (move, captured, castlingRights, enPassantSquare, hash) = history.Pop();
+            CastlingRights = castlingRights;
+            EnPassantSquare = enPassantSquare;
+            Hash = hash; // the hash from before the move is simply restored
             CastlingRights = castlingRights;
             EnPassantSquare = enPassantSquare;
 

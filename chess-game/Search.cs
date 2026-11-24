@@ -16,6 +16,9 @@ namespace chess_game
         private static long stopTimeMs = long.MaxValue;            // search should stop once the timer passes this
         private static bool stopped; // true when time runs out in the middle of search
         public static int LastDepth { get; private set; }
+        // remembers positions already searched; 2^20 slots (about 40 MB), kept between moves because positions repeat
+        private static readonly TranspositionTable table = new TranspositionTable(20);
+        private const int MateThreshold = MateScore - 1000; // any score beyond this is a mate score
 
         public static Move Think(Board board, int maxDepth, int timeLimitMs)
         {
@@ -45,15 +48,7 @@ namespace chess_game
         {
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
             OrderMoves(board, moves);
-            if (previousBest.HasValue)
-            {
-                int index = moves.IndexOf(previousBest.Value);
-                if (index > 0) // found, and not already first
-                {
-                    moves.RemoveAt(index);
-                    moves.Insert(0, previousBest.Value);
-                }
-            }
+            if (previousBest.HasValue) MoveToFront(moves, previousBest.Value);
             Move bestMove = moves[0];
             int bestScore = -Infinity;
             int alpha = -Infinity, beta = Infinity;
@@ -99,13 +94,31 @@ namespace chess_game
                 return Quiescence(board, alpha, beta);
             }
 
+            // transposition table: have we searched this exact position before?
+            int originalAlpha = alpha;
+            Move? tableMove = null;
+            if (table.TryGet(board.Hash, out TableEntry entry))
+            {
+                if (entry.HasMove) tableMove = entry.BestMove; // even a shallower result tells us a good move to try first
+
+                if (entry.Depth >= depth) // searched at least as deep as we need: the stored score can be reused
+                {
+                    int stored = ScoreFromTable(entry.Score, ply);
+                    if (entry.Bound == BoundType.Exact) return stored;
+                    if (entry.Bound == BoundType.LowerBound && stored >= beta) return stored;  // already proven too good
+                    if (entry.Bound == BoundType.UpperBound && stored <= alpha) return stored; // already proven too weak
+                }
+            }
+
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
             if (moves.Count == 0) // no legal moves
                 return MoveGen.IsInCheck(board, board.SideToMove) ? -MateScore + ply : 0;
 
             OrderMoves(board, moves);
+            if (tableMove.HasValue) MoveToFront(moves, tableMove.Value); // best move from last time goes first
 
             int bestScore = -Infinity;
+            Move bestMove = moves[0];
             foreach (Move move in moves)
             {
                 board.MakeMove(move);
@@ -113,11 +126,48 @@ namespace chess_game
                 board.UndoMove();
                 if (stopped) return 0;
 
-                if (score > bestScore) bestScore = score;
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestMove = move;
+                }
                 if (score > alpha) alpha = score; // raise guaranteed score
                 if (alpha >= beta) break; // wont allow this position, skip remaining moves
             }
+
+            // remember the result, and what kind of result it is
+            BoundType bound = bestScore <= originalAlpha ? BoundType.UpperBound  // nothing beat alpha: at most this
+                            : bestScore >= beta ? BoundType.LowerBound           // cut off early: at least this
+                            : BoundType.Exact;
+            table.Store(board.Hash, depth, ScoreToTable(bestScore, ply), bound, bestMove);
             return bestScore;
+        }
+
+        // mate scores depend on distance from the root (ply), but a stored position can be reached at a different ply,
+        // so they're stored as "mate in N from this position" and converted back when read
+        private static int ScoreToTable(int score, int ply)
+        {
+            if (score > MateThreshold) return score + ply;
+            if (score < -MateThreshold) return score - ply;
+            return score;
+        }
+
+        private static int ScoreFromTable(int score, int ply)
+        {
+            if (score > MateThreshold) return score - ply;
+            if (score < -MateThreshold) return score + ply;
+            return score;
+        }
+
+        // moves one move to the front of the list (if it's there), keeping the others in order
+        private static void MoveToFront(List<Move> moves, Move move)
+        {
+            int index = moves.IndexOf(move);
+            if (index > 0) // found, and not already first
+            {
+                moves.RemoveAt(index);
+                moves.Insert(0, move);
+            }
         }
 
         private static int Quiescence(Board board, int alpha, int beta)
