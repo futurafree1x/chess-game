@@ -79,7 +79,10 @@ namespace chess_game
             if (standPat >= beta) return standPat;        // already too good, the opponent won't allow this
             if (standPat > alpha) alpha = standPat;       // stopping is always allowed
 
-            foreach (Move move in MoveGen.GenerateLegalMoves(board))
+            List<Move> moves = MoveGen.GenerateLegalMoves(board);
+            OrderMoves(board, moves); // best captures first, cut-offs happen sooner
+
+            foreach (Move move in moves)
             {
                 if (!IsCapture(board, move)) continue;    // only captures are searched here
 
