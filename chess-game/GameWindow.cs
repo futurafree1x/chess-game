@@ -19,7 +19,6 @@ namespace chess_game
         private const int SquareSize = 80;
         private readonly Board board = new Board();
         private readonly Dictionary<Piece, Image> pieceImages = new Dictionary<Piece, Image>();
-
         private readonly Color lightSquare = Color.FromArgb(221, 221, 221);
         private readonly Color darkSquare = Color.FromArgb(48, 71, 94);
         private int dragFrom = -1; // square being dragged from or -1 if none
@@ -27,6 +26,7 @@ namespace chess_game
         private List<Move> legalMoves = new List<Move>();
         private readonly Image moveDot = Resources.moveDot;
         private bool gameOver = false;
+        private readonly PlayerColour engineColour = PlayerColour.Black;
         private int SquareAt(Point p) // helper function to get the square index from a mouse click point, returns -1 if outside the board
         {
             if (p.X < 0 || p.Y < 0 || p.X >= 8 * SquareSize || p.Y >= 8 * SquareSize)
@@ -159,7 +159,12 @@ namespace chess_game
 
             dragFrom = -1;   // stop dragging either way
             panelBoard.Invalidate();
-            if (moved) CheckGameOver();
+            if (moved)
+            {
+                CheckGameOver();
+                panelBoard.Refresh(); // draw the player's move before the engine starts thinking
+                PlayEngineMove();
+            }
         }
         private void DrawMoveDots(Graphics g) // shows where the dragged piece can move
         {
@@ -185,6 +190,17 @@ namespace chess_game
             {
                 g.FillRectangle(red, file * SquareSize, (7 - rank) * SquareSize, SquareSize, SquareSize);
             }
+        }
+
+        private void PlayEngineMove() // the engine makes its move if it is its turn
+        {
+            if (gameOver || board.SideToMove != engineColour) return;
+
+            Move move = Search.FindBestMove(board);
+            board.MakeMove(move);
+            UpdateTitle();
+            panelBoard.Invalidate();
+            CheckGameOver();
         }
 
         private void CheckGameOver() // ends the game if the player to move has no legal moves
