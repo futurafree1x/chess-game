@@ -38,7 +38,7 @@ namespace chess_game
         }
         private void UpdateTitle()
         {
-            this.Text = $"Chess   eval: {Evaluation.Evaluate(board) / 100.0: + 0.00;-0.00;0.00}";
+            this.Text = $"Chess   eval: {Evaluation.Evaluate(board) / 100.0:+0.00;-0.00;0.00}   engine depth: {Search.LastDepth}";
         }
         public GameWindow()
         {

@@ -15,6 +15,7 @@ namespace chess_game
         private static readonly Stopwatch timer = new Stopwatch(); // how long the engine has been thinking
         private static long stopTimeMs = long.MaxValue;            // search should stop once the timer passes this
         private static bool stopped; // true when time runs out in the middle of search
+        public static int LastDepth { get; private set; }
 
         public static Move Think(Board board, int maxDepth, int timeLimitMs)
         {
@@ -23,6 +24,7 @@ namespace chess_game
             stopTimeMs = long.MaxValue;
 
             Move bestMove = FindBestMove(board, 1);
+            LastDepth = 1;
             stopTimeMs = timeLimitMs;
 
             for (int depth = 2; depth <= maxDepth; depth++)
@@ -32,6 +34,7 @@ namespace chess_game
                 Move move = FindBestMove(board, depth, bestMove);
                 if (stopped) break;
                 bestMove = move;
+                LastDepth = depth;
             }
             stopTimeMs = long.MaxValue;
             stopped = false;
