@@ -12,6 +12,17 @@ namespace chess_game
         private const int Infinity = 1000000;
         private const int MateScore = 100000; // smaller than infinity, bigger than any evaluation
         private static readonly int[] orderValues = { 0, 10, 1, 3, 3, 5, 9 };// rough piece values usedfor ordering: None, King, Pawn, Knight, Bishop, Rook, Queen
+
+        public static Move Think(Board board, int maxDepth)
+        {
+            Move bestMove = default;
+            for (int depth = 1; depth <= maxDepth; depth++)
+            {
+                bestMove = FindBestMove(board, depth);
+            }
+            return bestMove;
+        }
+
         public static Move FindBestMove(Board board, int depth) // finds the best move, (depth) moves ahead
         {
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
@@ -35,6 +46,7 @@ namespace chess_game
             }
             return bestMove;
         }
+
         private static int MoveOrderScore(Board board, Move move)
         {
             if (!IsCapture(board, move)) return 0; // quiet moves go last
@@ -101,10 +113,12 @@ namespace chess_game
             int score = Evaluation.Evaluate(board);
             return board.SideToMove == PlayerColour.White ? score : -score;
         }
+
         private static bool IsCapture(Board board, Move move)
         {
             return board.Squares[move.To] != Piece.None || move.Flag == MoveFlag.EnPassant;
         }
+
         private static void OrderMoves(Board board, List<Move> moves)
         {
             moves.Sort((a, b) => MoveOrderScore(board, b).CompareTo(MoveOrderScore(board, a)));
