@@ -34,6 +34,7 @@ namespace chess_game
                 bestMove = move;
             }
             stopTimeMs = long.MaxValue;
+            stopped = false;
             return bestMove;
         }
 
