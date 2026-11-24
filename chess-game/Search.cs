@@ -24,7 +24,7 @@ namespace chess_game
             Move bestMove = FindBestMove(board, 1);
             stopTimeMs = timeLimitMs;
 
-            for (int depth = 1; depth <= maxDepth; depth++)
+            for (int depth = 2; depth <= maxDepth; depth++)
             {
                 if (timer.ElapsedMilliseconds >= timeLimitMs / 2) break;
 
