@@ -189,5 +189,19 @@ namespace chess_game
             }
             return result;
         }
-    }
+
+        public static int Evaluate(Board board)
+        {
+            int mg = 0, eg = 0, phase = 0;
+            for (int sq = 0; sq < 64; sq++)
+            {
+                int p = (int)board.Squares[square];
+                mg += mgScore[p][square];
+                eg += egScore[p][square];
+                phase += piecePhase[p];
+            }
+            if (phase > 24) phase = 24;
+
+            return (mg * phase + eg * (24 - phase)) / 24;
+        }
 }
