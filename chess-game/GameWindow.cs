@@ -36,6 +36,10 @@ namespace chess_game
             int rank = 7 - p.Y / SquareSize;
             return rank * 8 + file;
         }
+        private void UpdateTitle()
+        {
+            this.Text = $"Chess   eval: {Evaluation.Evaluate(board) / 100.0: + 0.00;-0.00;0.00}";
+        }
         public GameWindow()
         {
             InitializeComponent();
@@ -47,6 +51,7 @@ namespace chess_game
                     pieceImages[p] = (Image)Resources.ResourceManager.GetObject(p.ToString());
             }
             board.LoadFen(Board.StartFen);  // load board position and get piece images from resources
+            UpdateTitle();
         }
 
         private void GameWindow_Load(object sender, EventArgs e)
@@ -147,6 +152,7 @@ namespace chess_game
                 if (index != -1) // a legal move between these squares exists
                 {
                     board.MakeMove(legalMoves[index]);
+                    UpdateTitle();
                     moved = true;
                 }
             }
