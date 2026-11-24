@@ -19,11 +19,14 @@ namespace chess_game
         // remembers positions already searched; 2^20 slots (about 40 MB), kept between moves because positions repeat
         private static readonly TranspositionTable table = new TranspositionTable(20);
         private const int MateThreshold = MateScore - 1000; // any score beyond this is a mate score
+        private const int MaxPly = 64;
+        private static readonly Move?[,] killers = new Move?[MaxPly, 2];
 
         public static Move Think(Board board, int maxDepth, int timeLimitMs)
         {
             timer.Restart();
             stopped = false;
+            Array.Clear(killers, 0, killers.Length);
             stopTimeMs = long.MaxValue;
 
             Move bestMove = FindBestMove(board, 1);
@@ -132,7 +135,11 @@ namespace chess_game
                     bestMove = move;
                 }
                 if (score > alpha) alpha = score; // raise guaranteed score
-                if (alpha >= beta) break; // wont allow this position, skip remaining moves
+                if (alpha >= beta)
+                {
+                    if (!IsCapture(board, move)) StoreKiller(ply, move);
+                    break;
+                }
             }
 
             // remember the result, and what kind of result it is
@@ -168,6 +175,15 @@ namespace chess_game
                 moves.RemoveAt(index);
                 moves.Insert(0, move);
             }
+        }
+
+        private static void StoreKiller(int ply, Move move)
+        {
+            if (ply >= MaxPly) return;
+            if (killers[ply, 0].HasValue && killers[ply, 0].Value.Equals(move)) return;
+
+            killers[ply, 1] = killers[ply, 0]; 
+            killers[ply, 0] = move;
         }
 
         private static int Quiescence(Board board, int alpha, int beta)
