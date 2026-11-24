@@ -14,10 +14,12 @@ namespace chess_game
         private static readonly int[] orderValues = { 0, 10, 1, 3, 3, 5, 9 };// rough piece values usedfor ordering: None, King, Pawn, Knight, Bishop, Rook, Queen
         private static readonly Stopwatch timer = new Stopwatch(); // how long the engine has been thinking
         private static long stopTimeMs = long.MaxValue;            // search should stop once the timer passes this
+        private static bool stopped; // true when time runs out in the middle of search
 
         public static Move Think(Board board, int maxDepth, int timeLimitMs)
         {
             timer.Restart();
+            stopped = false;
             stopTimeMs = long.MaxValue;
 
             Move bestMove = FindBestMove(board, 1);
@@ -27,7 +29,9 @@ namespace chess_game
             {
                 if (timer.ElapsedMilliseconds >= timeLimitMs / 2) break;
 
-                bestMove = FindBestMove(board, depth);
+                Move move = FindBestMove(board, depth);
+                if (stopped) break;
+                bestMove = move;
             }
             return bestMove;
         }
@@ -45,6 +49,7 @@ namespace chess_game
                 board.MakeMove(move);
                 int score = -Negamax(board, depth - 1, 1, -beta, -alpha);
                 board.UndoMove();
+                if (stopped) break;
 
                 if (score > bestScore)
                 {
@@ -67,6 +72,12 @@ namespace chess_game
        
         private static int Negamax(Board board, int depth, int ply, int alpha, int beta)  // best score the side to move can reach, looking (depth) moves ahead
         {
+            if (timer.ElapsedMilliseconds >= stopTimeMs)
+            {
+                stopped = true;
+                return 0;
+            }
+
             if (depth == 0)
             {
                 if (MoveGen.IsInCheck(board, board.SideToMove) && MoveGen.GenerateLegalMoves(board).Count == 0)
@@ -86,6 +97,7 @@ namespace chess_game
                 board.MakeMove(move);
                 int score = -Negamax(board, depth - 1, ply + 1, -beta, -alpha); // opponents best flipped to players side
                 board.UndoMove();
+                if (stopped) return 0;
 
                 if (score > bestScore) bestScore = score;
                 if (score > alpha) alpha = score; // raise guaranteed score
