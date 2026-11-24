@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace chess_game
 {
@@ -12,16 +13,23 @@ namespace chess_game
         private const int Infinity = 1000000;
         private const int MateScore = 100000; // smaller than infinity, bigger than any evaluation
         private static readonly int[] orderValues = { 0, 10, 1, 3, 3, 5, 9 };// rough piece values usedfor ordering: None, King, Pawn, Knight, Bishop, Rook, Queen
+        private static readonly Stopwatch timer = new Stopwatch(); // how long the engine has been thinking
+        private static long stopTimeMs = long.MaxValue;            // search should stop once the timer passes this
 
         public static Move Think(Board board, int maxDepth, int timeLimitMs)
         {
-            var timer = System.Diagnostics.Stopwatch.StartNew();
-            Move bestMove = default;
+            timer.Restart();
+            stopTimeMs = long.MaxValue;
+
+            Move bestMove = FindBestMove(board, 1);
+            stopTimeMs = timeLimitMs;
 
             for (int depth = 1; depth <= maxDepth; depth++)
             {
                 bestMove = FindBestMove(board, depth);
                 if (timer.ElapsedMilliseconds >= timeLimitMs / 2) break;
+
+                bestMove = FindBestMove(board, depth);
             }
             return bestMove;
         }
