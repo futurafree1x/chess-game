@@ -196,7 +196,7 @@ namespace chess_game
         {
             if (gameOver || board.SideToMove != engineColour) return;
 
-            Move move = Search.FindBestMove(board);
+            Move move = Search.FindBestMove(board, 3);
             board.MakeMove(move);
             UpdateTitle();
             panelBoard.Invalidate();
