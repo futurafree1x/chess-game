@@ -29,7 +29,7 @@ namespace chess_game
             {
                 if (timer.ElapsedMilliseconds >= timeLimitMs / 2) break;
 
-                Move move = FindBestMove(board, depth);
+                Move move = FindBestMove(board, depth, bestMove);
                 if (stopped) break;
                 bestMove = move;
             }
@@ -38,10 +38,19 @@ namespace chess_game
             return bestMove;
         }
 
-        public static Move FindBestMove(Board board, int depth) // finds the best move, (depth) moves ahead
+        public static Move FindBestMove(Board board, int depth, Move? previousBest = null) // finds the best move, (depth) moves ahead
         {
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
             OrderMoves(board, moves);
+            if (previousBest.HasValue)
+            {
+                int index = moves.IndexOf(previousBest.Value);
+                if (index > 0) // found, and not already first
+                {
+                    moves.RemoveAt(index);
+                    moves.Insert(0, previousBest.Value);
+                }
+            }
             Move bestMove = moves[0];
             int bestScore = -Infinity;
             int alpha = -Infinity, beta = Infinity;
