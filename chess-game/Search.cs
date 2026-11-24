@@ -21,7 +21,7 @@ namespace chess_game
             foreach (Move move in moves)
             {
                 board.MakeMove(move);
-                int score = -Negamax(board, depth - 1, 1, -alpha, -beta);
+                int score = -Negamax(board, depth - 1, 1, -beta, -alpha);
                 board.UndoMove();
 
                 if (score > bestScore)
