@@ -16,23 +16,25 @@ namespace chess_game
             List<Move> moves = MoveGen.GenerateLegalMoves(board);
             Move bestMove = moves[0];
             int bestScore = -Infinity;
+            int alpha = -Infinity, beta = Infinity;
 
             foreach (Move move in moves)
             {
                 board.MakeMove(move);
-                int score = -Negamax(board, depth - 1, 1);
+                int score = -Negamax(board, depth - 1, 1, -alpha, -beta);
                 board.UndoMove();
 
                 if (score > bestScore)
                 {
                     bestScore = score;
                     bestMove = move;
+                    alpha = score;
                 }
             }
             return bestMove;
         }
         // best score the side to move can reach, looking (depth) moves ahead
-        private static int Negamax(Board board, int depth, int ply)
+        private static int Negamax(Board board, int depth, int ply, int alpha, int beta)
         {
             if (depth == 0)
             {
@@ -48,10 +50,12 @@ namespace chess_game
             foreach (Move move in moves)
             {
                 board.MakeMove(move);
-                int score = -Negamax(board, depth - 1, ply + 1); // opponents best flipped to players side
+                int score = -Negamax(board, depth - 1, ply + 1, -beta, -alpha); // opponents best flipped to players side
                 board.UndoMove();
 
                 if (score > bestScore) bestScore = score;
+                if (score > alpha) alpha = score; // raise guaranteed score
+                if (alpha >= beta) break; // wont allow this position, skip remaining moves
             }
             return bestScore;
         }
