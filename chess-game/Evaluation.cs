@@ -25,7 +25,7 @@ namespace chess_game
             -35,  -1, -20, -23, -15,  24, 38, -22,
               0,   0,   0,   0,   0,   0,  0,   0,
         };
-        private static readonly int[] egPawnTable = 
+        private static readonly int[] egPawnTable =
         {
               0,   0,   0,   0,   0,   0,   0,   0,
             178, 173, 158, 134, 147, 132, 165, 187,
@@ -36,7 +36,7 @@ namespace chess_game
              13,   8,   8,  10,  13,   0,   2,  -7,
               0,   0,   0,   0,   0,   0,   0,   0,
         };
-        private static readonly int[] mgKnightTable = 
+        private static readonly int[] mgKnightTable =
         {
             -167, -89, -34, -49,  61, -97, -15, -107,
              -73, -41,  72,  36,  23,  62,   7,  -17,
@@ -47,7 +47,7 @@ namespace chess_game
              -29, -53, -12,  -3,  -1,  18, -14,  -19,
             -105, -21, -58, -33, -17, -28, -19,  -23,
         };
-        private static readonly int[] egKnightTable = 
+        private static readonly int[] egKnightTable =
         {
             -58, -38, -13, -28, -31, -27, -63, -99,
             -25,  -8, -25,  -2,  -9, -25, -24, -52,
@@ -174,7 +174,7 @@ namespace chess_game
                     if (piece.IsWhite())
                         result[p][square] = values[type] + tables[type][square ^ 56]; // flips the rank
                     else
-                        result[p][square] = -(values[type] + tables[type][square]); 
+                        result[p][square] = -(values[type] + tables[type][square]);
                 }
             }
             return result;
@@ -183,7 +183,7 @@ namespace chess_game
         private static int[] BuildPhaseTable() // phase weight indexed by Piece
         {
             var result = new int[13];
-            for (int p = 1; p <13; p++)
+            for (int p = 1; p < 13; p++)
             {
                 result[p] = phaseWeights[(int)((Piece)p).Type()];
             }
@@ -195,13 +195,14 @@ namespace chess_game
             int mg = 0, eg = 0, phase = 0;
             for (int sq = 0; sq < 64; sq++)
             {
-                int p = (int)board.Squares[square];
-                mg += mgScore[p][square];
-                eg += egScore[p][square];
+                int p = (int)board.Squares[sq];
+                mg += mgScore[p][sq];
+                eg += egScore[p][sq];
                 phase += piecePhase[p];
             }
             if (phase > 24) phase = 24;
 
             return (mg * phase + eg * (24 - phase)) / 24;
         }
+    }
 }
